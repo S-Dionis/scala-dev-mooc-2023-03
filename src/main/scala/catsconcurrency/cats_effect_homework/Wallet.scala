@@ -1,8 +1,12 @@
 package catsconcurrency.cats_effect_homework
 
-import cats.effect.Sync
+import cats.effect.{IO, Resource, Sync}
 import cats.implicits._
 import Wallet._
+
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files._
+import java.nio.file.{Files, Path, Paths, StandardOpenOption}
 
 // DSL управления электронным кошельком
 trait Wallet[F[_]] {
@@ -25,9 +29,38 @@ trait Wallet[F[_]] {
 // - java.nio.file.Files.exists
 // - java.nio.file.Paths.get
 final class FileWallet[F[_]: Sync](id: WalletId) extends Wallet[F] {
-  def balance: F[BigDecimal] = ???
-  def topup(amount: BigDecimal): F[Unit] = ???
-  def withdraw(amount: BigDecimal): F[Either[WalletError, Unit]] = ???
+
+  def balance: F[BigDecimal] = for {
+    exists <- Sync[F].blocking(Files.exists(Paths.get(id)))
+    balance <-
+      if (exists) {
+        Sync[F].blocking(BigDecimal(Files.readString(Paths.get(id)))).handleErrorWith(_ => Sync[F].pure(BigDecimal(0)))
+      } else {
+        Sync[F].raiseError(new Throwable("Id file not found"))
+      }
+  } yield balance
+
+  def topup(amount: BigDecimal): F[Unit] = for {
+    b <- balance
+    _ <- Sync[F].blocking {
+      Files.write(
+        Paths.get(id),
+        (b + amount).toString.getBytes(StandardCharsets.UTF_8),
+        StandardOpenOption.TRUNCATE_EXISTING
+      )
+    }
+  } yield Sync[F].unit
+
+  def withdraw(amount: BigDecimal): F[Either[WalletError, Unit]] =
+    for {
+      b <- balance
+      r <- if (b >= amount) {
+          topup(-amount).map(_.asRight)
+        } else {
+          Sync[F].blocking(BalanceTooLow.asLeft)
+        }
+    } yield r
+
 }
 
 object Wallet {
@@ -37,10 +70,13 @@ object Wallet {
   // Здесь нужно использовать обобщенную версию уже пройденного вами метода IO.delay,
   // вызывается она так: Sync[F].delay(...)
   // Тайпкласс Sync из cats-effect описывает возможность заворачивания сайд-эффектов
-  def fileWallet[F[_]: Sync](id: WalletId): F[Wallet[F]] = ???
+  def fileWallet[F[_]: Sync](id: WalletId): F[Wallet[F]] =
+    Sync[F].delay(Files.deleteIfExists(Paths.get(id))) *>
+      Sync[F].delay(Files.createFile(Paths.get(id))) *>
+      Sync[F].delay(new FileWallet(id))
 
   type WalletId = String
 
-  sealed trait WalletError
+  sealed trait WalletError  extends Throwable
   case object BalanceTooLow extends WalletError
 }
