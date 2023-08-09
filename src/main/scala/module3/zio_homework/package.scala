@@ -150,12 +150,6 @@ package object zio_homework {
     _ <- runningTimeService.printEffectRunningTime(app)
   } yield ()
 
-
-  lazy val appWithTimeLogg2: ZIO[RunningTimeService with Console with Clock with Random, Throwable, Unit] = for {
-    _ <- RunningTimeService.printEffectRunningTime(ZIO.effect(println("1")))
-  } yield ()
-
-
   /**
    *
    * Подготовьте его к запуску и затем запустите воспользовавшись ZioHomeWorkApp
