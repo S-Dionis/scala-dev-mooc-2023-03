@@ -37,20 +37,20 @@ object CirceJson extends IOApp.Simple{
 
   //1 dec
 
- /* implicit  val decoderUser: Decoder[User] = Decoder.instance(
-    cur =>
-      for {
-        name <- cur.downField("name").as[String]
-        email <- cur.downField("email").as[Option[String]]
-      } yield User(name, email)
-  )*/
+  /* implicit  val decoderUser: Decoder[User] = Decoder.instance(
+     cur =>
+       for {
+         name <- cur.downField("name").as[String]
+         email <- cur.downField("email").as[Option[String]]
+       } yield User(name, email)
+   )*/
 
   //2 semiauto
   implicit val decoderUser: Decoder[User] = deriveDecoder
   implicit val decoderPermissions: Decoder[Permissions] = deriveDecoder
 
   val example = """{"name" : "xxxx", "email": "musterman@sdasd.de"}"""
-//  val json: Either[ParsingFailure, Json] = parse(example)
+  //  val json: Either[ParsingFailure, Json] = parse(example)
   def run: IO[Unit] = IO.println{
     val s = for {
       json <- parse(example)
@@ -58,7 +58,7 @@ object CirceJson extends IOApp.Simple{
     } yield user
 
     val s1 = ""
- }
+  }
 }
 
 
@@ -69,8 +69,8 @@ object  restfulldesc{
   def publicRoutes: HttpRoutes[IO] = HttpRoutes.of {
     case r @ POST -> Root/"echo" =>
       for {
-       u <- r.as[CirceJson.User]
-       _ <- IO.println(u)
+        u <- r.as[CirceJson.User]
+        _ <- IO.println(u)
         response <- Ok(u)
       } yield response
   }
