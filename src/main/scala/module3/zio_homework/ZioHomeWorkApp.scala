@@ -6,6 +6,6 @@ import zio.random.Random
 import zio.{ExitCode, URIO}
 
 object ZioHomeWorkApp extends zio.App {
-  override def run(args: List[String]): URIO[Clock with Random with Console, ExitCode] =
-    ???
+  override def run(args: List[String]) =
+    runApp.exitCode
 }
