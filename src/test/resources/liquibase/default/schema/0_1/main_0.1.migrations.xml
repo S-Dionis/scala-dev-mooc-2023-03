@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="create User" author="p">
+          <createTable tableName="User">
+              <column name="id" type="text">
+                <constraints primaryKey="true" nullable="false"/>
+              </column>
+              <column name="firstName" type="text">
+                <constraints nullable="false"/>
+              </column>
+              <column name="lastName" type="text">
+                <constraints nullable="false"/>
+              </column>
+              <column name="age" type="int">
+                <constraints nullable="false"/>
+              </column>
+          </createTable>
+    </changeSet>
+
+    <changeSet id="create UserToRole" author="p">
+        <createTable tableName="UserToRole">
+            <column name="roleId" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="userId" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create Role" author="p">
+        <createTable tableName="Role">
+            <column name="code" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
